@@ -44,6 +44,11 @@ def relatorio_html(dict_metrics):
             background-color: lightgrey;
             }}
             
+            #grafico_tabela {{ 
+            display: flex;
+            justify-content: flex-start;
+            }}
+            
             #top_3_produtos {{
             border: 3px solid grey;
             margin-top: 40px;
@@ -93,16 +98,18 @@ def relatorio_html(dict_metrics):
 
         # criação da tabela para totais por produto e o respetivo cabeçalho
         f.write("""
-            
+        
+        <!-- div principal onde e criada a caixa cinzenta com a seccao toda(titulo, tabela e grafico) -->
         <div id="totais_por_produto">
-        <h2>Totais por Produto</h2>
-            
-        <table>
-            <tr>
-                <th>Produto</th>
-                <th>Total</th>
-            </tr>
-        """)
+            <h2>Totais por Produto</h2>
+            <!-- div interno usado apenas para alinhar a tabela e o grafico(o titulo fica de fora deste para nao interferir com o layout) -->
+            <div id="grafico_tabela">    
+                <table>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Total</th>
+                    </tr>
+                """)
 
 
         # calculo dos totais por produto
@@ -113,15 +120,15 @@ def relatorio_html(dict_metrics):
                 <td>{produto}</td>
                 <td>{total} €</td>
             </tr>
-            
             """)
 
         f.write("""
+
         </table>
+        <img src="grafico_vendas.png" width="600" height="433">
+        </div>
         </div>
         """)
-
-
 
 
         f.write("""
