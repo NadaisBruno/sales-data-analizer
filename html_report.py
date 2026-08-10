@@ -102,7 +102,7 @@ def relatorio_html(dict_metrics):
         <!-- div principal onde e criada a caixa cinzenta com a seccao toda(titulo, tabela e grafico) -->
         <div id="totais_por_produto">
             <h2>Totais por Produto</h2>
-            <!-- div interno usado apenas para alinhar a tabela e o grafico(o titulo fica de fora deste para nao interferir com o layout) -->
+            <!-- div interno usado apenas para alinhar a tabela e o grafico(o titulo fica de fora deste div para nao interferir com o layout) -->
             <div id="grafico_tabela">    
                 <table>
                     <tr>
