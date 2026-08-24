@@ -15,18 +15,19 @@ def create_clients_db():
         nome TEXT NOT NULL,
         empresa TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
-        telefone TEXT NOT NULL
+        telefone TEXT NOT NULL,
+        faturacao_total REAL NOT NULL
         )
         """)
         con.commit()
 
 
-def insert_clients_db(nome, empresa, email, telefone):
+def insert_clients_db(nome, empresa, email, telefone, faturacao_total):
     with sqlite3.connect("tss_crm.db") as con:
         cursor = con.cursor()
         cursor.execute("""
-        INSERT INTO clients (nome, empresa, email, telefone) VALUES (?, ?, ?, ?)
-        """, (nome, empresa, email, telefone))
+        INSERT INTO clients (nome, empresa, email, telefone, faturacao_total) VALUES (?, ?, ?, ?, ?)
+        """, (nome, empresa, email, telefone, faturacao_total))
         con.commit()
 
 
@@ -44,12 +45,12 @@ def list_clients_db():
         return cursor.fetchall()
 
 
-def update_clients_db(client_id, nome, empresa, email, telefone):
+def update_clients_db(client_id, nome, empresa, email, telefone, faturacao_total):
     with sqlite3.connect("tss_crm.db") as con:
         cursor = con.cursor()
         cursor.execute("""
-        UPDATE clients SET nome = ?, empresa = ?, email = ?, telefone = ? WHERE id = ?
-        """, (nome, empresa, email, telefone, client_id))
+        UPDATE clients SET nome = ?, empresa = ?, email = ?, telefone = ?, faturacao_total = ? WHERE id = ?
+        """, (nome, empresa, email, telefone, faturacao_total, client_id))
         con.commit()
 
 
