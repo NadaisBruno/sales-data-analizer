@@ -27,7 +27,7 @@ def adicionar_clients(nome_client, empresa_client, email_client, telefone_client
     # a-z = Aceita intervalo de minusculas
     # À-ÿ = Aceita intervalo de caracteres acentuados
     # ' = Aceita apóstrofo
-    # + = Permite varios caracteres; sem este + validava nomes com um unico caractere
+    # + = Permite varios caracteres; sem este + validava nomes com um unico caracter
     if not re.fullmatch(r"[A-Za-zÀ-ÿ' ]+", nome_client):
         st.error("O campo 'nome' contém carateres inválidos e não pode conter elementos númericos")
         return
@@ -268,238 +268,240 @@ def filtrar_leads(filter_nome, filter_empresa, filter_email, filter_estado):
     return filter_leads_db(filter_nome, filter_empresa, filter_email, filter_estado)
 
 
-# ---- titulo Streamlit----
-st.title("CRM TSS - Cibersegurança")
+def mostrar_crm():
 
-opcoes = st.selectbox(
-    "Por favor escolha uma opçao",
-    ("Clientes", "Leads/Oportunidades")
-)
+    # ---- titulo Streamlit----
+    st.title("CRM TSS - Cibersegurança")
 
-# --------------------------------- clients ----------------------------------------------
-# ------------- criar clients ----------------------
-if opcoes == "Clientes":
-    form_clients = st.form("Clientes", clear_on_submit=True)
-
-    titulo_clientes = form_clients.title("Clientes")
-
-    nome = form_clients.text_input("Nome")
-    empresa = form_clients.text_input("Empresa")
-    email = form_clients.text_input("Email")
-    telefone = form_clients.text_input("Telefone")
-    faturacao_total = form_clients.number_input("Faturação total", min_value=0)
-
-    botao_clients = form_clients.form_submit_button("Criar cliente")
-    if botao_clients:
-        #
-        adicionar_clients(nome, empresa, email, telefone, faturacao_total)
-
-    # subtitulo para a tabela de clientes
-    st.subheader("Lista de Clientes")
-
-    st.caption("Selecione um cliente para editar ou remover.")
-
-    # ---------------- remover clients -----------------------------
-    # vamos buscar todos os clientes a base de dados
-    listar_clientes = list_clients_db()
-
-    # criamos um dataframe com pandas para poder mostrar nomes nas colunas… sem isto o Streamlit mostra so cabecalhos numerados
-    dataframe_clientes = pd.DataFrame(
-        listar_clientes,
-        columns=["ID", "Nome", "Empresa", "Email", "Telefone", "Faturação Total"]
+    opcoes = st.selectbox(
+        "Por favor escolha uma opçao",
+        ("Clientes", "Leads/Oportunidades")
     )
 
-    # mostra todos os clientes numa tabela
-    # selection_mode permite selecionar uma linha na tabela
-    # faz o streamlit reagir à seleção
-    tabela_clientes = st.dataframe(dataframe_clientes, on_select="rerun", selection_mode="single-row")
+    # --------------------------------- clients ----------------------------------------------
+    # ------------- criar clients ----------------------
+    if opcoes == "Clientes":
+        form_clients = st.form("Clientes", clear_on_submit=True)
 
-    # verifica se foi selecionada uma linha na tabela
-    if tabela_clientes.selection.rows:
+        titulo_clientes = form_clients.title("Clientes")
 
-        # guarda o indice da linha selecionada
-        indice = tabela_clientes.selection.rows[0]
+        nome = form_clients.text_input("Nome")
+        empresa = form_clients.text_input("Empresa")
+        email = form_clients.text_input("Email")
+        telefone = form_clients.text_input("Telefone")
+        faturacao_total = form_clients.number_input("Faturação total", min_value=0)
 
-        # usa o indice da linha anterior para ir buscar o cliente correspondente a lista
-        cliente_selecionado = listar_clientes[indice]
+        botao_clients = form_clients.form_submit_button("Criar cliente")
+        if botao_clients:
+            #
+            adicionar_clients(nome, empresa, email, telefone, faturacao_total)
 
-        # o primeiro elemento do tuplo do cliente é o seu id
-        id_cliente = cliente_selecionado[0]
+        # subtitulo para a tabela de clientes
+        st.subheader("Lista de Clientes")
 
-        # criar o botao para remover o cliente selecionado
-        botao_remover_clients = st.button("Remover cliente")
+        st.caption("Selecione um cliente para editar ou remover.")
 
-        # se o botao for clicado...
-        if botao_remover_clients:
-            # ...chama a funcao de remocao de clientes
-            remover_clients(id_cliente)
-
-        # ------------------- atualizar clientes ------------------------
-
-        atualizar_nome = cliente_selecionado[1]
-        atualizar_empresa = cliente_selecionado[2]
-        atualizar_email = cliente_selecionado[3]
-        atualizar_telefone = cliente_selecionado[4]
-        atualizar_faturacao_total = cliente_selecionado[5]
-
-        # criamos um novo formulario, agora para atualizar/editar os clientes
-        form_atualizar_clients = st.form("Atualizar Clientes")
-
-        # titulo do formulario
-        titulo_atualizar_clientes = form_atualizar_clients.title("Atualizar Clientes")
-
-        # 'value' mostra os dados atuais do cliente
-        nome = form_atualizar_clients.text_input("Nome", value=atualizar_nome)
-        empresa = form_atualizar_clients.text_input("Empresa", value=atualizar_empresa)
-        email = form_atualizar_clients.text_input("Email", value=atualizar_email)
-        telefone = form_atualizar_clients.text_input("Telefone", value=atualizar_telefone)
-        faturacao_total = form_atualizar_clients.number_input("Faturação total", value=float(atualizar_faturacao_total),
-                                                              min_value=float(0))
-
-        botao_atualizar_clients = form_atualizar_clients.form_submit_button("Atualizar Cliente")
-        if botao_atualizar_clients:
-            editar_clientes(id_cliente, nome, empresa, email, telefone, faturacao_total)
-
-    # ---------------- filtrar clientes -----------------------
-
-    # Criamos um novo formulario para o processo de filtragem
-    form_filtrar_clients = st.form("Filtrar Clientes")
-
-    # Titulo do formulario
-    titulo_filtrar_clientes = form_filtrar_clients.title("Filtrar Clientes")
-
-    filtro_nome = form_filtrar_clients.text_input("Nome")
-    filtro_empresa = form_filtrar_clients.text_input("Empresa")
-    filtro_email = form_filtrar_clients.text_input("Email")
-
-    # botao filtrar clientes
-    botao_filtrar_clients = form_filtrar_clients.form_submit_button("Filtrar Clientes")
-    if botao_filtrar_clients:
-        filtro = filtrar_clientes(filtro_nome, filtro_empresa, filtro_email)
+        # ---------------- remover clients -----------------------------
+        # vamos buscar todos os clientes a base de dados
+        listar_clientes = list_clients_db()
 
         # criamos um dataframe com pandas para poder mostrar nomes nas colunas… sem isto o Streamlit mostra so cabecalhos numerados
-        dataframe_filtro = pd.DataFrame(
-            filtro,
-            columns=["ID", "Nome", "Empresa", "Email"]
+        dataframe_clientes = pd.DataFrame(
+            listar_clientes,
+            columns=["ID", "Nome", "Empresa", "Email", "Telefone", "Faturação Total"]
         )
 
-        st.dataframe(dataframe_filtro)
+        # mostra todos os clientes numa tabela
+        # selection_mode permite selecionar uma linha na tabela
+        # faz o streamlit reagir à seleção
+        tabela_clientes = st.dataframe(dataframe_clientes, on_select="rerun", selection_mode="single-row")
 
-# ------------------------------- leads ----------------------------------------------
-# --------- criar leads -------------------
-if opcoes == "Leads/Oportunidades":
-    form_leads = st.form("Leads", clear_on_submit=True)
+        # verifica se foi selecionada uma linha na tabela
+        if tabela_clientes.selection.rows:
 
-    # titulo
-    titulo_leads = form_leads.title("Leads")
+            # guarda o indice da linha selecionada
+            indice = tabela_clientes.selection.rows[0]
 
-    nome = form_leads.text_input("Nome")
-    empresa = form_leads.text_input("Empresa")
-    email = form_leads.text_input("Email")
-    telefone = form_leads.text_input("Telefone")
-    servico = form_leads.text_input("Serviço")
-    valor = form_leads.number_input("Valor", min_value=0)
-    estado = form_leads.selectbox("Selecione uma opção", ("Novo", "Contactado", "Proposta", "Ganho", "Perdido"))
+            # usa o indice da linha anterior para ir buscar o cliente correspondente a lista
+            cliente_selecionado = listar_clientes[indice]
 
-    # botao leads
-    botao_criar_leads = form_leads.form_submit_button("Criar Lead")
-    if botao_criar_leads:
-        adicionar_leads(nome, empresa, email, telefone, servico, valor, estado)
+            # o primeiro elemento do tuplo do cliente é o seu id
+            id_cliente = cliente_selecionado[0]
 
-    st.subheader("Lista de Leads")
+            # criar o botao para remover o cliente selecionado
+            botao_remover_clients = st.button("Remover cliente")
 
-    st.caption("Selecione uma lead para editar ou remover")
+            # se o botao for clicado...
+            if botao_remover_clients:
+                # ...chama a funcao de remocao de clientes
+                remover_clients(id_cliente)
 
-    # ---------- remover leads ------------------
-    listar_leads = list_leads_db()
+            # ------------------- atualizar clientes ------------------------
 
-    # criamos um dataframe com pandas para poder mostrar nomes nas colunas… sem isto o Streamlit mostra so cabecalhos numerados
-    dataframe_leads = pd.DataFrame(
-        listar_leads,
-        columns=["ID", "Nome", "Empresa", "Email", "Telefone", "Serviço", "Valor", "Estado"]
-    )
+            atualizar_nome = cliente_selecionado[1]
+            atualizar_empresa = cliente_selecionado[2]
+            atualizar_email = cliente_selecionado[3]
+            atualizar_telefone = cliente_selecionado[4]
+            atualizar_faturacao_total = cliente_selecionado[5]
 
-    # criamos a tabela para listar as leads
-    tabela_leads = st.dataframe(dataframe_leads, on_select="rerun", selection_mode="single-row")
+            # criamos um novo formulario, agora para atualizar/editar os clientes
+            form_atualizar_clients = st.form("Atualizar Clientes")
 
-    # verificamos se foi selecionada uma linha na tabela
-    if tabela_leads.selection.rows:
+            # titulo do formulario
+            titulo_atualizar_clientes = form_atualizar_clients.title("Atualizar Clientes")
 
-        # guardamos o indice para identificar o ID
-        indice = tabela_leads.selection.rows[0]
+            # 'value' mostra os dados atuais do cliente
+            nome = form_atualizar_clients.text_input("Nome", value=atualizar_nome)
+            empresa = form_atualizar_clients.text_input("Empresa", value=atualizar_empresa)
+            email = form_atualizar_clients.text_input("Email", value=atualizar_email)
+            telefone = form_atualizar_clients.text_input("Telefone", value=atualizar_telefone)
+            faturacao_total = form_atualizar_clients.number_input("Faturação total", value=float(atualizar_faturacao_total),
+                                                                  min_value=float(0))
 
-        # usa o indice da linha anterior para ir buscar a lead correspondente a lista
-        lead_selecionada = listar_leads[indice]
+            botao_atualizar_clients = form_atualizar_clients.form_submit_button("Atualizar Cliente")
+            if botao_atualizar_clients:
+                editar_clientes(id_cliente, nome, empresa, email, telefone, faturacao_total)
 
-        # o primeiro elemento do tuplo da lead é o seu id
-        id_lead = lead_selecionada[0]
+        # ---------------- filtrar clientes -----------------------
 
-        # criamos um botao para remover a lead
-        botao_remover_lead = st.button("Remover lead")
+        # Criamos um novo formulario para o processo de filtragem
+        form_filtrar_clients = st.form("Filtrar Clientes")
 
-        if botao_remover_lead:
-            remover_leads(id_lead)
+        # Titulo do formulario
+        titulo_filtrar_clientes = form_filtrar_clients.title("Filtrar Clientes")
 
-        # --------- atualizar leads -----------
-        atualizar_lead_nome = lead_selecionada[1]
-        atualizar_lead_empresa = lead_selecionada[2]
-        atualizar_lead_email = lead_selecionada[3]
-        atualizar_lead_telefone = lead_selecionada[4]
-        atualizar_lead_servico = lead_selecionada[5]
-        atualizar_lead_valor = lead_selecionada[6]
-        atualizar_lead_estado = lead_selecionada[7]
+        filtro_nome = form_filtrar_clients.text_input("Nome")
+        filtro_empresa = form_filtrar_clients.text_input("Empresa")
+        filtro_email = form_filtrar_clients.text_input("Email")
 
-        # logica para, ao abrir o selectbox, mostrar o estado atual da lead
-        # index() serve para descobrir a posicao de um valor em uma lista
-        estados_leads = ["Novo", "Contactado", "Proposta", "Ganho", "Perdido"]
-        indice_estados = estados_leads.index(atualizar_lead_estado)
+        # botao filtrar clientes
+        botao_filtrar_clients = form_filtrar_clients.form_submit_button("Filtrar Clientes")
+        if botao_filtrar_clients:
+            filtro = filtrar_clientes(filtro_nome, filtro_empresa, filtro_email)
 
-        # criamos um novo formulario para atualizar/editar as leads
-        form_atualizar_leads = st.form("Atualizar Leads")
+            # criamos um dataframe com pandas para poder mostrar nomes nas colunas… sem isto o Streamlit mostra so cabecalhos numerados
+            dataframe_filtro = pd.DataFrame(
+                filtro,
+                columns=["ID", "Nome", "Empresa", "Email"]
+            )
 
-        # criamos um título para a tabela
-        form_atualizar_leads_titulo = form_atualizar_leads.title("Atualizar Leads")
+            st.dataframe(dataframe_filtro)
 
-        lead_nome = form_atualizar_leads.text_input("Nome", value=atualizar_lead_nome)
-        lead_empresa = form_atualizar_leads.text_input("Empresa", value=atualizar_lead_empresa)
-        lead_email = form_atualizar_leads.text_input("Email", value=atualizar_lead_email)
-        lead_telefone = form_atualizar_leads.text_input("Telefone", value=atualizar_lead_telefone)
-        lead_servico = form_atualizar_leads.text_input("Serviço", value=atualizar_lead_servico)
-        lead_valor = form_atualizar_leads.number_input("Valor", value=float(atualizar_lead_valor), min_value=float(0))
-        lead_estado = form_atualizar_leads.selectbox("Selecione uma opção",
-                                                     ("Novo", "Contactado", "Proposta", "Ganho", "Perdido"),
-                                                     index=indice_estados)
+    # ------------------------------- leads ----------------------------------------------
+    # --------- criar leads -------------------
+    if opcoes == "Leads/Oportunidades":
+        form_leads = st.form("Leads", clear_on_submit=True)
 
-        # criamos o botao para atualizar as leads
-        botao_atualizar_leads = form_atualizar_leads.form_submit_button("Atualizar Lead")
-        if botao_atualizar_leads:
-            editar_leads(id_lead, lead_nome, lead_empresa, lead_email, lead_telefone, lead_servico, lead_valor,
-                         lead_estado)
+        # titulo
+        titulo_leads = form_leads.title("Leads")
 
-    # ---------- filtrar leads ------------
+        nome = form_leads.text_input("Nome")
+        empresa = form_leads.text_input("Empresa")
+        email = form_leads.text_input("Email")
+        telefone = form_leads.text_input("Telefone")
+        servico = form_leads.text_input("Serviço")
+        valor = form_leads.number_input("Valor", min_value=0)
+        estado = form_leads.selectbox("Selecione uma opção", ("Novo", "Contactado", "Proposta", "Ganho", "Perdido"))
 
-    # Criamos um novo formulario para o processo de filtragem
-    form_filtrar_leads = st.form("Filtrar Leads")
+        # botao leads
+        botao_criar_leads = form_leads.form_submit_button("Criar Lead")
+        if botao_criar_leads:
+            adicionar_leads(nome, empresa, email, telefone, servico, valor, estado)
 
-    # criamos um título para o formulario de filtragem
-    form_filtrar_leads_titulo = form_filtrar_leads.title("Filtrar Leads")
+        st.subheader("Lista de Leads")
 
-    filtro_nome_lead = form_filtrar_leads.text_input("Nome")
-    filtro_empresa_lead = form_filtrar_leads.text_input("Empresa")
-    filtro_email_lead = form_filtrar_leads.text_input("Email")
-    filtro_estado_lead = form_filtrar_leads.selectbox("Estado", ("", "Novo", "Contactado", "Proposta", "Ganho", "Perdido"))
+        st.caption("Selecione uma lead para editar ou remover")
 
-    # criamos o botao para filtrar as leads
-    botao_filtrar_leads = form_filtrar_leads.form_submit_button("Filtrar Lead")
-    if botao_filtrar_leads:
-        filtro_leads = filtrar_leads(filtro_nome_lead, filtro_empresa_lead, filtro_email_lead, filtro_estado_lead)
+        # ---------- remover leads ------------------
+        listar_leads = list_leads_db()
 
         # criamos um dataframe com pandas para poder mostrar nomes nas colunas… sem isto o Streamlit mostra so cabecalhos numerados
-        dataframe_filtro_leads = pd.DataFrame(
-            filtro_leads,
-            columns=["ID", "Nome", "Empresa", "Email", "Estado"]
+        dataframe_leads = pd.DataFrame(
+            listar_leads,
+            columns=["ID", "Nome", "Empresa", "Email", "Telefone", "Serviço", "Valor", "Estado"]
         )
 
-        st.dataframe(dataframe_filtro_leads)
+        # criamos a tabela para listar as leads
+        tabela_leads = st.dataframe(dataframe_leads, on_select="rerun", selection_mode="single-row")
+
+        # verificamos se foi selecionada uma linha na tabela
+        if tabela_leads.selection.rows:
+
+            # guardamos o indice para identificar o ID
+            indice = tabela_leads.selection.rows[0]
+
+            # usa o indice da linha anterior para ir buscar a lead correspondente a lista
+            lead_selecionada = listar_leads[indice]
+
+            # o primeiro elemento do tuplo da lead é o seu id
+            id_lead = lead_selecionada[0]
+
+            # criamos um botao para remover a lead
+            botao_remover_lead = st.button("Remover lead")
+
+            if botao_remover_lead:
+                remover_leads(id_lead)
+
+            # --------- atualizar leads -----------
+            atualizar_lead_nome = lead_selecionada[1]
+            atualizar_lead_empresa = lead_selecionada[2]
+            atualizar_lead_email = lead_selecionada[3]
+            atualizar_lead_telefone = lead_selecionada[4]
+            atualizar_lead_servico = lead_selecionada[5]
+            atualizar_lead_valor = lead_selecionada[6]
+            atualizar_lead_estado = lead_selecionada[7]
+
+            # logica para, ao abrir o selectbox, mostrar o estado atual da lead
+            # index() serve para descobrir a posicao de um valor em uma lista
+            estados_leads = ["Novo", "Contactado", "Proposta", "Ganho", "Perdido"]
+            indice_estados = estados_leads.index(atualizar_lead_estado)
+
+            # criamos um novo formulario para atualizar/editar as leads
+            form_atualizar_leads = st.form("Atualizar Leads")
+
+            # criamos um título para a tabela
+            form_atualizar_leads_titulo = form_atualizar_leads.title("Atualizar Leads")
+
+            lead_nome = form_atualizar_leads.text_input("Nome", value=atualizar_lead_nome)
+            lead_empresa = form_atualizar_leads.text_input("Empresa", value=atualizar_lead_empresa)
+            lead_email = form_atualizar_leads.text_input("Email", value=atualizar_lead_email)
+            lead_telefone = form_atualizar_leads.text_input("Telefone", value=atualizar_lead_telefone)
+            lead_servico = form_atualizar_leads.text_input("Serviço", value=atualizar_lead_servico)
+            lead_valor = form_atualizar_leads.number_input("Valor", value=float(atualizar_lead_valor), min_value=float(0))
+            lead_estado = form_atualizar_leads.selectbox("Selecione uma opção",
+                                                         ("Novo", "Contactado", "Proposta", "Ganho", "Perdido"),
+                                                         index=indice_estados)
+
+            # criamos o botao para atualizar as leads
+            botao_atualizar_leads = form_atualizar_leads.form_submit_button("Atualizar Lead")
+            if botao_atualizar_leads:
+                editar_leads(id_lead, lead_nome, lead_empresa, lead_email, lead_telefone, lead_servico, lead_valor,
+                             lead_estado)
+
+        # ---------- filtrar leads ------------
+
+        # Criamos um novo formulario para o processo de filtragem
+        form_filtrar_leads = st.form("Filtrar Leads")
+
+        # criamos um título para o formulario de filtragem
+        form_filtrar_leads_titulo = form_filtrar_leads.title("Filtrar Leads")
+
+        filtro_nome_lead = form_filtrar_leads.text_input("Nome")
+        filtro_empresa_lead = form_filtrar_leads.text_input("Empresa")
+        filtro_email_lead = form_filtrar_leads.text_input("Email")
+        filtro_estado_lead = form_filtrar_leads.selectbox("Estado", ("", "Novo", "Contactado", "Proposta", "Ganho", "Perdido"))
+
+        # criamos o botao para filtrar as leads
+        botao_filtrar_leads = form_filtrar_leads.form_submit_button("Filtrar Lead")
+        if botao_filtrar_leads:
+            filtro_leads = filtrar_leads(filtro_nome_lead, filtro_empresa_lead, filtro_email_lead, filtro_estado_lead)
+
+            # criamos um dataframe com pandas para poder mostrar nomes nas colunas… sem isto o Streamlit mostra so cabecalhos numerados
+            dataframe_filtro_leads = pd.DataFrame(
+                filtro_leads,
+                columns=["ID", "Nome", "Empresa", "Email", "Estado"]
+            )
+
+            st.dataframe(dataframe_filtro_leads)
 
 

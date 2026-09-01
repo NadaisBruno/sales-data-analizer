@@ -1,73 +1,81 @@
-from tkinter import messagebox
+import streamlit as st
 import pandas as pd
 
 
 def validate_csv(file):
-    df = pd.read_csv(file, encoding="utf-8", sep=";")
-    print(df)
 
-    # se o df estiver vazio mostra erro
+    # validacao para o caso de um csv completamente vazio
+    try:
+        df = pd.read_csv(file, encoding="utf-8", sep=";")
+        print(df)
+
+    except pd.errors.EmptyDataError:
+        st.error("Erro - CSV está vazio!")
+        return None
+
+
+    # se o df estiver vazio(ou seja o dataframe/tabela esta criada, mas está sem valores) mostra erro
     if df.empty:
-        messagebox.showerror("Erro", "O ficheiro esta vazio")
+        st.error("Erro - O ficheiro contém cabeçalhos mas não contém registos de dados!")
         return None
 
     # verificamos se o CSV contem as colunas obrigatorias
     colunas_obrigatorias = ["Cliente", "Produto", "Quantidade", "Preço", "Data"]
     for coluna in colunas_obrigatorias:
         if coluna not in df.columns:
-            messagebox.showerror("Erro", "O ficheiro deve conter as colunas: Cliente, Produto, Quantidade, Preço e Data")
+            st.error("Erro - O ficheiro deve conter as colunas: Cliente, Produto, Quantidade, Preço e Data")
             return None
 
+    # data -----
     # converter a coluna data para o tipo datetime
     # qualquer valor que nao seja uma data valida é tranformado em NAT(not a time)
     # com coerce o program apresenta erro imediato e transforma esse valor numa data invalida(NaT)
     df["Data"] = pd.to_datetime(df["Data"], dayfirst=True, errors="coerce")
     if df["Data"].isna().any():
-        messagebox.showerror("Erro", "Certifique-se que as datas estão no formato válido(DD-MM-AAAA ou AAAA-MM-DD)")
+        st.error("Erro - Certifique-se que as datas estão no formato válido(DD-MM-AAAA ou AAAA-MM-DD)")
         return None
 
     # preço -----
     df["Preço"] = pd.to_numeric(df["Preço"], errors="coerce")
     if df["Preço"].isna().any():
-        messagebox.showerror("Erro", "Certifique-se que todos os valores desta coluna são numeros válidos,"
-                                     "usando ponto como separador")
+        st.error("Erro - Certifique-se que todos os valores desta coluna são numeros válidos, usando ponto como separador")
         return None
 
     if (df["Preço"] <= 0).any():
-        messagebox.showerror("Erro", "Existem valores negativos na coluna Preço")
+        st.error("Erro - Existem valores negativos ou nulos/zero na coluna Preço")
         return None
 
-    # quantidade ----
+    # quantidade -----
     df["Quantidade"] = pd.to_numeric(df["Quantidade"], errors="coerce")
     if df["Quantidade"].isna().any():
-        messagebox.showerror("Erro", "Certifique-se que os valores desta coluna são numeros inteiros")
+        st.error("Erro - Certifique-se que os valores desta coluna são numeros inteiros")
         return None
 
 
     if (df["Quantidade"] <= 0).any():
-        messagebox.showerror("Erro", "Existem valores negativos ou nulos na coluna 'Quantidade'")
+        st.error("Erro - Existem valores negativos ou nulos na coluna 'Quantidade'")
         return None
 
     if (df["Quantidade"] % 1 != 0).any():
-        messagebox.showerror("Erro", "A coluna 'Quantidade' não pode conter valores decimais")
+        st.error("Erro - A coluna 'Quantidade' não pode conter valores decimais")
         return None
 
     # produto -----
-    if (df["Produto"].str.strip() == "").any():
-        messagebox.showerror("Erro", "A coluna 'Produto' contem valores vazios ou apenas espaços em branco")
+    if df["Produto"].isna().any():
+        st.error("Erro - A coluna 'Produto' contem valores em falta.Preencha todas as celulas antes de continuar")
         return None
 
-    if df["Produto"].isna().any():
-        messagebox.showerror("Erro", "A coluna 'Produto' contem valores em falta.Preencha todas as celulas antes de continuar")
+    if (df["Produto"].str.strip() == "").any():
+        st.error("Erro - A coluna 'Produto' contem valores vazios ou apenas espaços em branco")
         return None
 
     # cliente -----
     if df["Cliente"].isna().any():
-        messagebox.showerror("Erro", "A coluna 'Cliente' contem valores em falta.Preencha todas as celulas antes de continuar")
+        st.error("Erro - A coluna 'Cliente' contem valores em falta. Preencha todas as celulas antes de continuar")
         return None
 
     if (df["Cliente"].str.strip() == "").any():
-        messagebox.showerror("Erro", "A coluna 'Cliente' contem valores vazios ou apenas espaços em branco")
+        st.error("Erro - A coluna 'Cliente' contem valores vazios ou apenas espaços em branco")
         return None
 
     print(df.shape)
