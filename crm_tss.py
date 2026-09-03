@@ -215,7 +215,7 @@ def editar_leads(leads_id, nome_leads, empresa_leads, email_leads, telefone_lead
         return
 
     if not re.fullmatch(r"[A-Za-zÀ-ÿ' ]+", nome_leads):
-        st.error("O campo 'nome' contém carateres inválidos e não pode conter elementos númericos")
+        st.error("O campo 'nome' contém carateres inválidos e não pode conter elementos numéricos")
         return
 
     # validacao empresa
@@ -270,8 +270,14 @@ def filtrar_leads(filter_nome, filter_empresa, filter_email, filter_estado):
 
 def mostrar_crm():
 
-    # ---- titulo Streamlit----
-    st.title("CRM TSS - Cibersegurança")
+    # ---- logo da empresa ----
+    # criacao de uma tabela com tres colunas so para poder centrar o logo da empresa
+    col1, col2, col3 = st.columns(3)
+    with col2:
+        st.image("Formadores_Day_Traders.png", width=300)
+
+    # ---- titulo Streamlit ----
+    st.title("CRM Formadores Day Traders")
 
     opcoes = st.selectbox(
         "Por favor escolha uma opçao",
@@ -503,5 +509,3 @@ def mostrar_crm():
             )
 
             st.dataframe(dataframe_filtro_leads)
-
-
