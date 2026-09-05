@@ -270,12 +270,6 @@ def filtrar_leads(filter_nome, filter_empresa, filter_email, filter_estado):
 
 def mostrar_crm():
 
-    # ---- logo da empresa ----
-    # criacao de uma tabela com tres colunas so para poder centrar o logo da empresa
-    col1, col2, col3 = st.columns(3)
-    with col2:
-        st.image("Formadores_Day_Traders.png", width=300)
-
     # ---- titulo Streamlit ----
     st.title("CRM Formadores Day Traders")
 

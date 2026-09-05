@@ -33,6 +33,13 @@ def open_file():
         print(dict_metrics)
 
 
+# ---- logo da empresa ----
+# criacao de uma tabela com tres colunas so para poder centrar o logo da empresa
+col1, col2, col3 = st.columns(3)
+with col2:
+    st.image("Formadores_Day_Traders.png", width=300)
+
+
 opcoes = st.selectbox(
     "Por favor escolha uma opção",
     ("Análise CSV", "CRM")
